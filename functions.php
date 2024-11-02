@@ -1,12 +1,31 @@
-<?php add_action('wp_footer', 'add_noscript_data');
+<?php add_action('init', 'c7_init');
+function c7_init() {
+  register_nav_menus([
+    'principal' => __('Principal Menu', 'ng-conf')
+  ]);
+}
+
+add_action('wp_footer', 'add_noscript_data');
 function add_noscript_data() {
+  $menu_items = wp_get_nav_menu_items(40);
+  $menu_principal = [];
+  if ($menu_items) {
+    foreach ($menu_items as $item) {
+      $menu_principal[] = [
+        'title' => $item->title,
+        'url' => $item->url
+      ];
+    }
+  }
+  $general = [
+    'titulo' => get_bloginfo('name'),
+    'url' => get_bloginfo('url'),
+  ];
   if (is_single()) {
     $data = [
       'tipo' => 'single',
-      'general' => [
-        'titulo' => get_bloginfo('name'),
-        'url' => get_bloginfo('url'),
-      ],
+      'general' => $general,
+      'menu' => $menu_principal,
       'articulo' => [
         'id' => get_the_ID(),
         'titulo' => get_the_title(),
@@ -28,10 +47,8 @@ function add_noscript_data() {
     }
     $data = [
       'tipo' => 'home',
-      'general' => [
-        'titulo' => get_bloginfo('name'),
-        'url' => get_bloginfo('url'),
-      ],
+      'general' => $general,
+      'menu' => $menu_principal,
       'articulos' => $articulos,
       'paginado' => [
         'total' => $wp_query->max_num_pages,
